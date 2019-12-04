@@ -1,10 +1,24 @@
 package com.xebia.fs101.writerpad.domain;
 
 
-import javax.persistence.*;
+import com.xebia.fs101.writerpad.util.StringUtil;
+
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -13,6 +27,7 @@ public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+    @Transient
     private String slug;
     @NotNull
     private String title;
@@ -22,104 +37,108 @@ public class Article {
     private String body;
     @ElementCollection
     private List<String> tagList;
-    private Date createdAt;
+    @Transient
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt = new Date();
+    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
-    private Boolean favorited;
+    private boolean favorited;
     private int favoriteCount;
 
+    @Enumerated(EnumType.STRING)
+    private ArticleStatus status = ArticleStatus.valueOf("DRAFT");
+
+    @OneToMany(mappedBy = "article")
+    private List<Comment> comments;
+
+    public Article() {
+    }
+
+
+    public void setUpdatedAt() {
+        this.updatedAt = new Date();
+    }
+
     private Article(Builder builder) {
-        setId(builder.id);
-        setSlug(builder.slug);
-        setTitle(builder.title);
-        setDiscription(builder.description);
-        setBody(builder.body);
-        setTagList(builder.tagList);
-        setCreatedAt(builder.createdAt);
-        setUpdatedAt(builder.updatedAt);
-        setFavorited(builder.favorited);
-        setFavoriteCount(builder.favoriteCount);
+        id = builder.id;
+        description = builder.description;
+        title = builder.title;
+        slug = StringUtil.slug(title);
+        body = builder.body;
+        tagList = builder.tagList;
+        setUpdatedAt();
+        favorited = false;
+        favoriteCount = 0;
+        status = ArticleStatus.DRAFT;
+        comments = builder.comments;
+    }
+
+    public void setStatus(ArticleStatus status) {
+        this.status = status;
     }
 
     public UUID getId() {
         return id;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public String getSlug() {
-        return slug;
-    }
-
-    public void setSlug(String slug) {
-        this.slug = slug;
+        return StringUtil.slug(this.title);
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public void setDiscription(String description) {
-        this.description = description;
     }
 
     public String getBody() {
         return body;
     }
 
-    public void setBody(String body) {
-        this.body = body;
-    }
-
     public List<String> getTagList() {
         return tagList;
-    }
-
-    public void setTagList(List<String> tagList) {
-        this.tagList = tagList;
     }
 
     public Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public Date getUpdatedAt() {
         return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public Boolean getFavorited() {
         return favorited;
     }
 
-    public void setFavorited(Boolean favorited) {
-        this.favorited = favorited;
-    }
-
     public int getFavoriteCount() {
         return favoriteCount;
     }
 
-    public void setFavoriteCount(int favoriteCount) {
-        this.favoriteCount = favoriteCount;
+    public List<Comment> getComments() {
+        return comments;
     }
 
+    public ArticleStatus getStatus() {
+        return status;
+    }
+
+
+    public Article update(Article copyFrom) {
+        if (Objects.nonNull(copyFrom.getTitle())) {
+            this.title = copyFrom.getTitle();
+        }
+        if (Objects.nonNull(copyFrom.getBody())) {
+            this.body = copyFrom.getBody();
+        }
+        if (Objects.nonNull(copyFrom.getDescription())) {
+            this.description = copyFrom.getDescription();
+        }
+        this.updatedAt = new Date();
+        return this;
+    }
 
     public static final class Builder {
         private UUID id;
@@ -132,6 +151,8 @@ public class Article {
         private Date updatedAt;
         private Boolean favorited;
         private int favoriteCount;
+        private ArticleStatus status;
+        private List<Comment> comments;
 
         public Builder() {
         }
@@ -166,15 +187,6 @@ public class Article {
             return this;
         }
 
-        public Builder withCreatedAt(Date val) {
-            createdAt = val;
-            return this;
-        }
-
-        public Builder withUpdatedAt(Date val) {
-            updatedAt = val;
-            return this;
-        }
 
         public Builder withFavorited(Boolean val) {
             favorited = val;
@@ -186,24 +198,18 @@ public class Article {
             return this;
         }
 
+        public Builder withStatus(ArticleStatus val) {
+            status = val;
+            return this;
+        }
+
+        public Builder withComments(List<Comment> val) {
+            comments = val;
+            return this;
+        }
+
         public Article build() {
             return new Article(this);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Article{"
-                + "id=" + id
-                + ", slug='" + slug + '\''
-                + ", title='" + title + '\''
-                + ", description='" + description + '\''
-                + ", body='" + body + '\''
-                + ", tagList=" + tagList
-                + ", createdAt=" + createdAt
-                + ", updatedAt=" + updatedAt
-                + ", favorited=" + favorited
-                + ", favoriteCount=" + favoriteCount
-                + '}';
     }
 }

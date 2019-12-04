@@ -1,13 +1,30 @@
-package com.xebia.fs101.writerpad.request;
+package com.xebia.fs101.writerpad.api.representations;
+
+import com.xebia.fs101.writerpad.domain.Article;
+
+import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ArticleRequest {
 
+    @NotBlank
     private String title;
+    @NotBlank
     private String description;
+    @NotBlank
     private String body;
     private String[] tags;
 
     public ArticleRequest() {
+    }
+
+    public Article toArticle() {
+        return new Article.Builder().withTitle(this.getTitle())
+                .withDescription(this.getDescription())
+                .withBody(this.getBody())
+                .withTagList(this.tags == null ? new ArrayList<>() : Arrays.asList(this.tags))
+                .build();
     }
 
     private ArticleRequest(Builder builder) {
@@ -33,6 +50,7 @@ public class ArticleRequest {
     public String[] getTags() {
         return tags;
     }
+
 
     public static final class Builder {
         private String title;
@@ -67,6 +85,7 @@ public class ArticleRequest {
             return new ArticleRequest(this);
         }
     }
+
     @Override
     public String toString() {
         return "ArticleRequest{"

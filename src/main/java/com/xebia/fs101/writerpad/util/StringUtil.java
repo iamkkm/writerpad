@@ -2,6 +2,7 @@ package com.xebia.fs101.writerpad.util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public abstract class StringUtil {
@@ -16,5 +17,8 @@ public abstract class StringUtil {
                 .map(String::toLowerCase)
                 .map(StringUtil::slug)
                 .collect(Collectors.toList());
+    }
+    public static UUID toUuid(String input) {
+        return UUID.fromString(input.substring(input.length() - 36));
     }
 }
