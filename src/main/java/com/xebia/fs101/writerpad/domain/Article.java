@@ -1,8 +1,11 @@
 package com.xebia.fs101.writerpad.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.xebia.fs101.writerpad.util.StringUtil;
 
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,6 +13,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -34,9 +38,10 @@ public class Article {
     @NotNull
     private String description;
     @NotNull
+    @Column(length = 5000)
     private String body;
     @ElementCollection
-    private List<String> tagList;
+    private List<String> tags;
     @Transient
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
@@ -44,12 +49,24 @@ public class Article {
     private Date updatedAt;
     private boolean favorited;
     private int favoriteCount;
+    @JsonManagedReference
+    @ManyToOne(optional = false)
+    private User user;
 
     @Enumerated(EnumType.STRING)
     private ArticleStatus status = ArticleStatus.valueOf("DRAFT");
 
+    @JsonBackReference
     @OneToMany(mappedBy = "article")
     private List<Comment> comments;
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
 
     public Article() {
     }
@@ -65,10 +82,10 @@ public class Article {
         title = builder.title;
         slug = StringUtil.slug(title);
         body = builder.body;
-        tagList = builder.tagList;
+        tags = builder.tags;
         setUpdatedAt();
         favorited = false;
-        favoriteCount = 0;
+        favoriteCount = builder.favoriteCount;
         status = ArticleStatus.DRAFT;
         comments = builder.comments;
     }
@@ -97,8 +114,8 @@ public class Article {
         return body;
     }
 
-    public List<String> getTagList() {
-        return tagList;
+    public List<String> getTags() {
+        return tags;
     }
 
     public Date getCreatedAt() {
@@ -125,6 +142,13 @@ public class Article {
         return status;
     }
 
+    public void setFavorited(boolean favorited) {
+        this.favorited = favorited;
+    }
+
+    public void setFavoriteCount(int favoriteCount) {
+        this.favoriteCount = favoriteCount;
+    }
 
     public Article update(Article copyFrom) {
         if (Objects.nonNull(copyFrom.getTitle())) {
@@ -140,13 +164,26 @@ public class Article {
         return this;
     }
 
+    public void markFavorited() {
+        this.setFavorited(true);
+        this.setFavoriteCount(this.getFavoriteCount() + 1);
+    }
+
+    public void markUnfavorited() {
+        this.setFavoriteCount(this.getFavoriteCount() - 1);
+        if (this.getFavoriteCount() == 0)
+            this.setFavorited(false);
+        if (this.getFavoriteCount() < 0)
+            throw new IllegalArgumentException("Favorite Count is already 0");
+    }
+
     public static final class Builder {
         private UUID id;
         private String slug;
         private @NotNull String title;
         private @NotNull String description;
         private @NotNull String body;
-        private List<String> tagList;
+        private List<String> tags;
         private Date createdAt;
         private Date updatedAt;
         private Boolean favorited;
@@ -182,8 +219,8 @@ public class Article {
             return this;
         }
 
-        public Builder withTagList(List<String> val) {
-            tagList = val;
+        public Builder withTags(List<String> val) {
+            tags = val;
             return this;
         }
 

@@ -2,27 +2,38 @@ package com.xebia.fs101.writerpad.service;
 
 import com.xebia.fs101.writerpad.domain.Article;
 import com.xebia.fs101.writerpad.domain.ArticleStatus;
+import com.xebia.fs101.writerpad.domain.User;
+import com.xebia.fs101.writerpad.exception.ArticleNotFoundException;
 import com.xebia.fs101.writerpad.repository.ArticleRepository;
+import com.xebia.fs101.writerpad.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static com.xebia.fs101.writerpad.util.StringUtil.toUuid;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class ArticleService {
 
     @Autowired
     private ArticleRepository articleRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    public Article save(Article article) {
+    public Article save(Article article, User user) {
+        Optional<User> optionalUser = userRepository.findById(user.getId());
+        User foundUser = optionalUser.get();
+        article.setUser(foundUser);
         return articleRepository.save(article);
-
     }
 
     public Optional<Article> findArticle(String slugUuid) {
@@ -46,13 +57,9 @@ public class ArticleService {
         return Optional.of(articleRepository.save(article));
     }
 
-    public Optional<Article> findById(String slugUuid) {
+    public Article findById(String slugUuid) {
         UUID id = toUuid(slugUuid);
-        Optional<Article> optionalArticle = articleRepository.findById(id);
-        if (!optionalArticle.isPresent()) {
-            return Optional.empty();
-        }
-        return optionalArticle;
+        return articleRepository.findById(id).orElseThrow(ArticleNotFoundException::new);
     }
 
     public Page<Article> findByStatus(String status, Pageable pageable) {
@@ -80,4 +87,21 @@ public class ArticleService {
         return articleRepository.findAll(pageable);
     }
 
+    @Transactional(readOnly = true)
+    public Map<String, Long> findTagsWithOccurence() {
+        return this.articleRepository.findAllTags().collect(groupingBy(tag -> tag, counting()));
+    }
+
+    public void favoritedArticle(String slugUuid) {
+        Article article = findById(slugUuid);
+        article.markFavorited();
+        articleRepository.save(article);
+    }
+
+    public void unfavoritedArticle(String slugUuid) {
+        Article article = findById(slugUuid);
+        article.markUnfavorited();
+        articleRepository.save(article);
+
+    }
 }

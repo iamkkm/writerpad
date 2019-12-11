@@ -10,4 +10,5 @@ public class WriterpadApplication {
     public static void main(String[] args) {
         SpringApplication.run(WriterpadApplication.class, args);
     }
+
 }

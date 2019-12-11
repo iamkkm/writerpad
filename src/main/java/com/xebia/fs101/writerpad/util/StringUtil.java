@@ -21,4 +21,8 @@ public abstract class StringUtil {
     public static UUID toUuid(String input) {
         return UUID.fromString(input.substring(input.length() - 36));
     }
+
+    public static int getTotalWords(String content) {
+        return content.split("\\s|\\.").length;
+    }
 }

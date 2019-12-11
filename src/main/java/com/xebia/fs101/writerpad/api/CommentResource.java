@@ -54,11 +54,8 @@ public class CommentResource {
 
     @GetMapping("/{slugUuid}/comments")
     public ResponseEntity<List<Comment>> getComments(@PathVariable String slugUuid) {
-        Optional<Article> article = articleService.findById(slugUuid);
-        if (!article.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-        UUID id = article.get().getId();
+        Article article = articleService.findById(slugUuid);
+        UUID id = article.getId();
         List<Comment> comments = commentService.findByArticleId(id);
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
@@ -66,10 +63,7 @@ public class CommentResource {
     @DeleteMapping("/{slugUuid}/comments/{id}")
     public ResponseEntity<Void> deleteComment(@PathVariable String slugUuid,
                                               @PathVariable long id) {
-        Optional<Article> article = articleService.findById(slugUuid);
-        if (!article.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
+        Article article = articleService.findById(slugUuid);
         commentService.delete(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

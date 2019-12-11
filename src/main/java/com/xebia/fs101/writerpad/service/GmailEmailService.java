@@ -8,6 +8,11 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 @Profile("!test")
 @Service
 public class GmailEmailService implements EmailService {
@@ -19,13 +24,20 @@ public class GmailEmailService implements EmailService {
     @Value("${email.subject}")
     private String subject;
 
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    //@Async
     @Override
-//    @Async
-    public void sendMail(Article article) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(emailTo);
-        message.setSubject(subject);
-        message.setText("Your article titled " + article.getTitle() + " pulished on web");
-        javaMailSender.send(message);
+    public void sendMail(Article article) throws ExecutionException, InterruptedException {
+
+        Runnable emailtask = () -> {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(emailTo);
+            message.setSubject(subject);
+            message.setText("Your article titled " + article.getTitle() + " pulished on web");
+            javaMailSender.send(message);
+        };
+
+        Future<?> submit = this.executorService.submit(emailtask);
     }
 }

@@ -23,7 +23,7 @@ public class ArticleRequest {
         return new Article.Builder().withTitle(this.getTitle())
                 .withDescription(this.getDescription())
                 .withBody(this.getBody())
-                .withTagList(this.tags == null ? new ArrayList<>() : Arrays.asList(this.tags))
+                .withTags(this.tags == null ? new ArrayList<>() : Arrays.asList(this.tags))
                 .build();
     }
 
