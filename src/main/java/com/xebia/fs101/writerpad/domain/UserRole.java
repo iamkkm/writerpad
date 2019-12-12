@@ -4,7 +4,7 @@ public enum UserRole {
 
     WRITER, EDITOR;
 
-    public String getRoleName(){
+    public String getRoleName() {
         return "ROLE_" + this.name();
     }
 }
