@@ -1,9 +1,9 @@
 package com.xebia.fs101.writerpad.api;
 
 import com.xebia.fs101.writerpad.api.representations.ArticleRequest;
-import com.xebia.fs101.writerpad.api.representations.ArticleResponse;
-import com.xebia.fs101.writerpad.api.representations.ReadTimeResponse;
-import com.xebia.fs101.writerpad.api.representations.TagResponse;
+import com.xebia.fs101.writerpad.api.response.ArticleResponse;
+import com.xebia.fs101.writerpad.api.response.ReadTimeResponse;
+import com.xebia.fs101.writerpad.api.response.TagResponse;
 import com.xebia.fs101.writerpad.domain.Article;
 import com.xebia.fs101.writerpad.domain.ArticleStatus;
 import com.xebia.fs101.writerpad.domain.ReadTime;
@@ -12,6 +12,8 @@ import com.xebia.fs101.writerpad.exception.WriterpadException;
 import com.xebia.fs101.writerpad.service.ArticleService;
 import com.xebia.fs101.writerpad.service.EmailService;
 import com.xebia.fs101.writerpad.service.ReadTimeCalculator;
+import com.xebia.fs101.writerpad.service.security.EditorOnly;
+import com.xebia.fs101.writerpad.service.security.WriterOnly;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -53,6 +55,7 @@ public class ArticleResource {
     @Autowired
     private ReadTimeCalculator readTimeCalculator;
 
+    @WriterOnly
     @PostMapping
     public ResponseEntity<ArticleResponse> save(@AuthenticationPrincipal User user,
             @Valid @RequestBody ArticleRequest articleRequest) {
@@ -126,6 +129,7 @@ public class ArticleResource {
                 .body(found);
     }
 
+    @EditorOnly
     @PostMapping("/{slugUuid}/PUBLISH")
     public ResponseEntity<Void> publish(@PathVariable("slugUuid") String slugUuid) {
         Optional<Article> article = articleService.findArticleById(slugUuid);

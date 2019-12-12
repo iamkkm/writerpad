@@ -1,4 +1,4 @@
-package com.xebia.fs101.writerpad.api.representations;
+package com.xebia.fs101.writerpad.api.response;
 
 import com.xebia.fs101.writerpad.domain.ReadTime;
 

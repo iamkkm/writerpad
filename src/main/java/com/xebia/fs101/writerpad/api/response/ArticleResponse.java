@@ -1,4 +1,4 @@
-package com.xebia.fs101.writerpad.api.representations;
+package com.xebia.fs101.writerpad.api.response;
 
 import com.xebia.fs101.writerpad.domain.Article;
 import com.xebia.fs101.writerpad.domain.ArticleStatus;
@@ -19,6 +19,7 @@ public class ArticleResponse {
     private long favoriteCount;
     private UserResponse author;
     private ArticleStatus status;
+    private String image;
 
     private ArticleResponse(Builder builder) {
         id = builder.id;
@@ -33,6 +34,7 @@ public class ArticleResponse {
         favoriteCount = builder.favoriteCount;
         author = builder.author;
         status = builder.status;
+        image = builder.image;
     }
 
     public static ArticleResponse from(Article article) {
@@ -49,6 +51,7 @@ public class ArticleResponse {
                 .withFavoritesCount(article.getFavoriteCount())
                 .withFavorited(article.getFavorited())
                 .withStatus(article.getStatus())
+                .withImage(article.getImage())
                 .build();
     }
 
@@ -66,6 +69,14 @@ public class ArticleResponse {
 
     public String getId() {
         return id;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public String getTitle() {
@@ -125,6 +136,7 @@ public class ArticleResponse {
         private long favoriteCount;
         private UserResponse author;
         public ArticleStatus status;
+        private String image;
 
         public Builder() {
         }
@@ -141,6 +153,11 @@ public class ArticleResponse {
 
         public Builder withSlug(String val) {
             slug = val;
+            return this;
+        }
+
+        public Builder withImage(String val) {
+            image = val;
             return this;
         }
 

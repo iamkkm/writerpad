@@ -30,6 +30,10 @@ class ArticleServiceTest {
     private ArticleRepository articleRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private CopyPasteDecoder copyPasteDecoder;
+    @Mock
+    private ImageRenderService imageRenderService;
     @InjectMocks
     private ArticleService articleService;
 
@@ -86,7 +90,7 @@ class ArticleServiceTest {
     }
 
     @Test
-    void should_return_article_when_article_exist() {
+    void should_return_updated_article_when_article_exist() {
         String id = UUID.randomUUID().toString();
         Article articleInDb = new Article.Builder()
                 .withBody("body")
@@ -95,11 +99,13 @@ class ArticleServiceTest {
                 .build();
         when(articleRepository.findById(UUID.fromString(id))).thenReturn(Optional.of(articleInDb));
         when(articleRepository.save(articleInDb)).thenReturn(articleInDb);
-        Optional<Article> updated = articleService.update(id, new Article.Builder().withTitle("updated title").build());
+        Optional<Article> updated = articleService.update(id, new Article.Builder().withTitle("updated title")
+                .withBody("test body")
+                .build());
         assertThat(updated).isNotEmpty();
         assertThat(updated.get().getTitle()).isEqualTo("updated title");
         assertThat(updated.get().getDescription()).isEqualTo("description");
-        assertThat(updated.get().getBody()).isEqualTo("body");
+        assertThat(updated.get().getBody()).isEqualTo("test body");
         verify(articleRepository).save(any());
         verifyNoMoreInteractions(articleRepository);
     }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -26,6 +28,8 @@ public class User {
     @JsonBackReference
     @OneToMany(mappedBy = "user")
     private List<Article> articles;
+    @Enumerated(value = EnumType.STRING)
+    private UserRole role;
 
     public User() {
     }
@@ -36,6 +40,7 @@ public class User {
         username = builder.username;
         email = builder.email;
         password = builder.password;
+        role = builder.role;
     }
 
     public User(User other) {
@@ -43,6 +48,7 @@ public class User {
         this.username = other.username;
         this.email = other.email;
         this.password = other.password;
+        this.role = other.role;
     }
 
     public Long getId() {
@@ -65,11 +71,16 @@ public class User {
         return articles;
     }
 
+    public UserRole getRole() {
+        return role;
+    }
+
     public static final class Builder {
         private Long id;
         private String username;
         private String email;
         private String password;
+        private UserRole role;
 
         public Builder() {
         }
@@ -91,6 +102,11 @@ public class User {
 
         public Builder withPassword(String val) {
             password = val;
+            return this;
+        }
+
+        public Builder withRole(UserRole val) {
+            role = val;
             return this;
         }
 

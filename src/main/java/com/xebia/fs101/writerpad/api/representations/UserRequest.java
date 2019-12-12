@@ -1,10 +1,12 @@
 package com.xebia.fs101.writerpad.api.representations;
 
 import com.xebia.fs101.writerpad.domain.User;
+import com.xebia.fs101.writerpad.domain.UserRole;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 public class UserRequest {
     @NotBlank
@@ -14,6 +16,8 @@ public class UserRequest {
     private String email;
     @NotBlank
     private String password;
+    @NotNull
+    private UserRole role;
 
     public UserRequest() {
     }
@@ -22,6 +26,7 @@ public class UserRequest {
         username = builder.username;
         email = builder.email;
         password = builder.password;
+        role = builder.role;
     }
 
     public String getUsername() {
@@ -36,11 +41,16 @@ public class UserRequest {
         return password;
     }
 
+    public UserRole getRole() {
+        return role;
+    }
+
     public User toUser(PasswordEncoder passwordEncoder) {
         return new User.Builder()
                 .withUsername(this.getUsername())
                 .withEmail(this.getEmail())
                 .withPassword(passwordEncoder.encode(password))
+                .withRole(this.getRole())
                 .build();
     }
 
@@ -48,6 +58,7 @@ public class UserRequest {
         private @NotBlank String username;
         private @NotBlank @Email String email;
         private @NotBlank String password;
+        private @NotBlank UserRole role;
 
         public Builder() {
         }
@@ -64,6 +75,11 @@ public class UserRequest {
 
         public Builder withPassword(@NotBlank String val) {
             password = val;
+            return this;
+        }
+
+        public Builder withRole(@NotBlank UserRole val) {
+            role = val;
             return this;
         }
 

@@ -6,6 +6,7 @@ import com.xebia.fs101.writerpad.api.representations.UserRequest;
 import com.xebia.fs101.writerpad.domain.Article;
 import com.xebia.fs101.writerpad.domain.ArticleStatus;
 import com.xebia.fs101.writerpad.domain.User;
+import com.xebia.fs101.writerpad.domain.UserRole;
 import com.xebia.fs101.writerpad.repository.ArticleRepository;
 import com.xebia.fs101.writerpad.repository.UserRepository;
 import com.xebia.fs101.writerpad.service.EmailService;
@@ -62,6 +63,7 @@ class ArticleResourceTest {
                 .withUsername("kamal")
                 .withEmail("kamal@mail.com")
                 .withPassword("abc")
+                .withRole(UserRole.WRITER)
                 .build();
         user = userRequest.toUser(passwordEncoder);
         userRepository.save(user);
@@ -90,6 +92,7 @@ class ArticleResourceTest {
                 .with(httpBasic("kamal", "abc"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
                 .andExpect(status().isCreated());
     }
 
@@ -228,11 +231,19 @@ class ArticleResourceTest {
     @Test
     void should_return_400_when_status_is_changed_to_published_of_an_already_published_article() throws Exception {
         Article article = createArticle("Title", "Desc", "Body");
+        UserRequest userRequest = new UserRequest.Builder()
+                .withUsername("kamal1")
+                .withEmail("kamal1@mail.com")
+                .withPassword("abc")
+                .withRole(UserRole.EDITOR)
+                .build();
+        User user = userRequest.toUser(passwordEncoder);
+        userRepository.save(user);
         article.setStatus(ArticleStatus.PUBLISHED);
         article.setUser(user);
         Article saved = articleRepository.save(article);
         mockMvc.perform(post("/api/articles/{sluguuid}/PUBLISH", "Title-" + saved.getId())
-                .with(httpBasic("kamal", "abc")))
+                .with(httpBasic("kamal1", "abc")))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
@@ -240,10 +251,18 @@ class ArticleResourceTest {
     @Test
     void should_be_able_to_publish_the_article() throws Exception {
         Article article = createArticle("Title", "Desc", "body");
+        UserRequest userRequest = new UserRequest.Builder()
+                .withUsername("kamal1")
+                .withEmail("kamal1@mail.com")
+                .withPassword("abc")
+                .withRole(UserRole.EDITOR)
+                .build();
+        User user = userRequest.toUser(passwordEncoder);
+        userRepository.save(user);
         article.setUser(user);
         Article saved = articleRepository.save(article);
         mockMvc.perform(post("/api/articles/{slugUuid}/PUBLISH", "Title-" + saved.getId())
-                .with(httpBasic("kamal", "abc")))
+                .with(httpBasic("kamal1", "abc")))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
@@ -370,7 +389,24 @@ class ArticleResourceTest {
 
     }
 
-    private Article createArticle(String title, String description, String body) {
+    @Test
+    void check_api_articles_post_request_status_as_created_with_image() throws Exception {
+        ArticleRequest articleRequest = new ArticleRequest.Builder()
+                .withBody("You have to believe")
+                .withTitle("How to learn Spring Booot")
+                .withDescription("Ever wonder how?").build();
+        String mockJson = objectMapper.writeValueAsString(articleRequest);
+        mockMvc.perform(post("/api/articles")
+                .content(mockJson)
+                .with(httpBasic("kamal", "abc"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(jsonPath("$.image").isNotEmpty())
+                .andExpect(status().isCreated());
+    }
+
+        private Article createArticle(String title, String description, String body) {
         return new Article.Builder()
                 .withTitle(title)
                 .withDescription(description)

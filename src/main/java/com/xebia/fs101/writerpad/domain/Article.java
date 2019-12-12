@@ -42,6 +42,7 @@ public class Article {
     private String body;
     @ElementCollection
     private List<String> tags;
+    private String image;
     @Transient
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt = new Date();
@@ -49,6 +50,7 @@ public class Article {
     private Date updatedAt;
     private boolean favorited;
     private int favoriteCount;
+
     @JsonManagedReference
     @ManyToOne(optional = false)
     private User user;
@@ -86,8 +88,17 @@ public class Article {
         setUpdatedAt();
         favorited = false;
         favoriteCount = builder.favoriteCount;
+        image = builder.image;
         status = ArticleStatus.DRAFT;
         comments = builder.comments;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public void setStatus(ArticleStatus status) {
@@ -190,6 +201,7 @@ public class Article {
         private int favoriteCount;
         private ArticleStatus status;
         private List<Comment> comments;
+        private String image;
 
         public Builder() {
         }
@@ -242,6 +254,11 @@ public class Article {
 
         public Builder withComments(List<Comment> val) {
             comments = val;
+            return this;
+        }
+
+        public Builder withImage(String val) {
+            image = val;
             return this;
         }
 

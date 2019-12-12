@@ -3,6 +3,7 @@ package com.xebia.fs101.writerpad.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xebia.fs101.writerpad.api.representations.UserRequest;
 import com.xebia.fs101.writerpad.domain.User;
+import com.xebia.fs101.writerpad.domain.UserRole;
 import com.xebia.fs101.writerpad.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -41,6 +42,7 @@ class UserResourceTest {
                 .withUsername("kk")
                 .withEmail("kk@gmail.com")
                 .withPassword("abc")
+                .withRole(UserRole.WRITER)
                 .build();
         String user = objectMapper.writeValueAsString(userRequest);
         mockMvc.perform(post("/api/users")
@@ -58,11 +60,13 @@ class UserResourceTest {
                 .withUsername("kk")
                 .withEmail("kk@kk.com")
                 .withPassword("abc")
+                .withRole(UserRole.WRITER)
                 .build();
         UserRequest userRequest2 = new UserRequest.Builder()
                 .withUsername("kk")
                 .withEmail("kk@kk.com")
                 .withPassword("abc")
+                .withRole(UserRole.WRITER)
                 .build();
         String user1 = objectMapper.writeValueAsString(userRequest1);
         String user2 = objectMapper.writeValueAsString(userRequest2);

@@ -4,6 +4,7 @@ import com.xebia.fs101.writerpad.domain.Article;
 import com.xebia.fs101.writerpad.domain.ArticleStatus;
 import com.xebia.fs101.writerpad.domain.User;
 import com.xebia.fs101.writerpad.exception.ArticleNotFoundException;
+import com.xebia.fs101.writerpad.exception.ArticleWithSameBodyException;
 import com.xebia.fs101.writerpad.repository.ArticleRepository;
 import com.xebia.fs101.writerpad.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +29,18 @@ public class ArticleService {
     private ArticleRepository articleRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ImageRenderService imageRenderService;
+    @Autowired
+    private CopyPasteDecoder copyPasteDecoder;
 
     public Article save(Article article, User user) {
+        if (copyPasteDecoder.isCopied(article.getBody()))
+            throw new ArticleWithSameBodyException();
         Optional<User> optionalUser = userRepository.findById(user.getId());
         User foundUser = optionalUser.get();
         article.setUser(foundUser);
+        article.setImage(imageRenderService.imageRender());
         return articleRepository.save(article);
     }
 
@@ -47,6 +55,8 @@ public class ArticleService {
     }
 
     public Optional<Article> update(String slugUuid, Article copyFrom) {
+        if (copyPasteDecoder.isCopied(copyFrom.getBody()))
+            throw new ArticleWithSameBodyException();
         UUID id = toUuid(slugUuid);
         Optional<Article> optionalArticle = articleRepository.findById(id);
         if (!optionalArticle.isPresent()) {
