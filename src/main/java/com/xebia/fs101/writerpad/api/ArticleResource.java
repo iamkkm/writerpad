@@ -12,6 +12,7 @@ import com.xebia.fs101.writerpad.exception.WriterpadException;
 import com.xebia.fs101.writerpad.service.ArticleService;
 import com.xebia.fs101.writerpad.service.EmailService;
 import com.xebia.fs101.writerpad.service.ReadTimeCalculator;
+import com.xebia.fs101.writerpad.service.security.AdminOnly;
 import com.xebia.fs101.writerpad.service.security.EditorOnly;
 import com.xebia.fs101.writerpad.service.security.WriterOnly;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,13 +103,14 @@ public class ArticleResource {
                 .body(found);
     }
 
+    @AdminOnly
     @DeleteMapping(path = "/{slug_uuid}")
     public ResponseEntity<Void> delete(@AuthenticationPrincipal User user,
                                        @PathVariable("slug_uuid") String slugUuid) {
         Article article = articleService.findById(slugUuid);
-        if (!article.getUser().getId().equals(user.getId())) {
+        /*if (!article.getUser().getId().equals(user.getId())) {
             return ResponseEntity.status(FORBIDDEN).build();
-        }
+        }*/
         boolean deleted = articleService.delete(slugUuid);
         if (!deleted) {
             return ResponseEntity.notFound().build();

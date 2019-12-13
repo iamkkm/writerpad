@@ -3,6 +3,7 @@ package com.xebia.fs101.writerpad.api;
 import com.xebia.fs101.writerpad.api.representations.UserRequest;
 import com.xebia.fs101.writerpad.domain.User;
 import com.xebia.fs101.writerpad.service.UserService;
+import com.xebia.fs101.writerpad.service.security.AdminOnly;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,7 @@ public class UserResource {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @AdminOnly
     @PostMapping
     public ResponseEntity<User> saveUser(@Valid @RequestBody UserRequest userRequest) {
         User user = userService.save(userRequest.toUser(passwordEncoder));

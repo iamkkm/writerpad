@@ -7,15 +7,18 @@ import com.xebia.fs101.writerpad.domain.UserRole;
 import com.xebia.fs101.writerpad.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,10 +33,25 @@ class UserResourceTest {
     private MockMvc mockMvc;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private User user;
 
     @AfterEach
     public void tearDown() {
         userRepository.deleteAll();
+    }
+
+    @BeforeEach
+    void setUp() {
+        user = new User.Builder()
+                .withUsername("testadmin")
+                .withEmail("testadmin@mail.com")
+                .withPassword(passwordEncoder.encode("abc"))
+                .withRole(UserRole.ADMIN)
+                .build();
+        userRepository.save(user);
     }
 
     @Test
@@ -47,7 +65,8 @@ class UserResourceTest {
         String user = objectMapper.writeValueAsString(userRequest);
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(user))
+                .content(user)
+                .with(httpBasic("testadmin", "abc")))
                 .andDo(print())
                 .andExpect(status().isCreated());
         List<User> allUsers = userRepository.findAll();
@@ -73,13 +92,15 @@ class UserResourceTest {
 
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(user1))
+                .content(user1)
+                .with(httpBasic("testadmin", "abc")))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(user2))
+                .content(user2)
+                .with(httpBasic("testadmin", "abc")))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }

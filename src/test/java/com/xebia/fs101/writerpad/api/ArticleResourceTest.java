@@ -6,7 +6,6 @@ import com.xebia.fs101.writerpad.api.representations.UserRequest;
 import com.xebia.fs101.writerpad.domain.Article;
 import com.xebia.fs101.writerpad.domain.ArticleStatus;
 import com.xebia.fs101.writerpad.domain.User;
-import com.xebia.fs101.writerpad.domain.UserRole;
 import com.xebia.fs101.writerpad.repository.ArticleRepository;
 import com.xebia.fs101.writerpad.repository.UserRepository;
 import com.xebia.fs101.writerpad.service.EmailService;
@@ -27,6 +26,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import java.util.Arrays;
 import java.util.UUID;
 
+import static com.xebia.fs101.writerpad.domain.UserRole.ADMIN;
+import static com.xebia.fs101.writerpad.domain.UserRole.EDITOR;
+import static com.xebia.fs101.writerpad.domain.UserRole.WRITER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -63,7 +65,7 @@ class ArticleResourceTest {
                 .withUsername("kamal")
                 .withEmail("kamal@mail.com")
                 .withPassword("abc")
-                .withRole(UserRole.WRITER)
+                .withRole(WRITER)
                 .build();
         user = userRequest.toUser(passwordEncoder);
         userRepository.save(user);
@@ -144,11 +146,19 @@ class ArticleResourceTest {
                 .withBody("appl")
                 .withDescription("boot")
                 .build();
+        UserRequest userRequest = new UserRequest.Builder()
+                .withUsername("kamal1")
+                .withEmail("kamal1@mail.com")
+                .withPassword("abc")
+                .withRole(ADMIN)
+                .build();
+        user = userRequest.toUser(passwordEncoder);
+        userRepository.save(user);
         article.setUser(user);
         Article savedArticle = articleRepository.save(article);
         String id = String.format("%s-%s", savedArticle.getSlug(), savedArticle.getId());
         this.mockMvc.perform(delete("/api/articles/{slug_id}", id)
-                .with(httpBasic("kamal", "abc")))
+                .with(httpBasic("kamal1", "abc")))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
@@ -156,8 +166,16 @@ class ArticleResourceTest {
     @Test
     void should_not_delete_an_article() throws Exception {
         String id = "abc" + "-" + UUID.randomUUID().toString();
+        UserRequest userRequest = new UserRequest.Builder()
+                .withUsername("kamal1")
+                .withEmail("kamal1@mail.com")
+                .withPassword("abc")
+                .withRole(ADMIN)
+                .build();
+        user = userRequest.toUser(passwordEncoder);
+        userRepository.save(user);
         this.mockMvc.perform(delete("/api/articles/{slug_id}", id)
-                .with(httpBasic("kamal", "abc")))
+                .with(httpBasic("kamal1", "abc")))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
@@ -235,7 +253,7 @@ class ArticleResourceTest {
                 .withUsername("kamal1")
                 .withEmail("kamal1@mail.com")
                 .withPassword("abc")
-                .withRole(UserRole.EDITOR)
+                .withRole(EDITOR)
                 .build();
         User user = userRequest.toUser(passwordEncoder);
         userRepository.save(user);
@@ -255,7 +273,7 @@ class ArticleResourceTest {
                 .withUsername("kamal1")
                 .withEmail("kamal1@mail.com")
                 .withPassword("abc")
-                .withRole(UserRole.EDITOR)
+                .withRole(EDITOR)
                 .build();
         User user = userRequest.toUser(passwordEncoder);
         userRepository.save(user);
@@ -406,7 +424,7 @@ class ArticleResourceTest {
                 .andExpect(status().isCreated());
     }
 
-        private Article createArticle(String title, String description, String body) {
+    private Article createArticle(String title, String description, String body) {
         return new Article.Builder()
                 .withTitle(title)
                 .withDescription(description)
