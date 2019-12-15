@@ -31,6 +31,10 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     private UserRole role;
 
+    private boolean following;
+    private int followerCount;
+    private int followingCount;
+
     public User() {
     }
 
@@ -41,6 +45,9 @@ public class User {
         email = builder.email;
         password = builder.password;
         role = builder.role;
+        following = builder.following;
+        followerCount = builder.followerCount;
+        followingCount = builder.followingCount;
     }
 
     public User(User other) {
@@ -57,6 +64,30 @@ public class User {
 
     public String getUsername() {
         return username;
+    }
+
+    public boolean isFollowing() {
+        return following;
+    }
+
+    public void setFollowing(boolean following) {
+        this.following = following;
+    }
+
+    public int getFollowerCount() {
+        return followerCount;
+    }
+
+    public void setFollowerCount(int followerCount) {
+        this.followerCount = followerCount;
+    }
+
+    public int getFollowingCount() {
+        return followingCount;
+    }
+
+    public void setFollowingCount(int followingCount) {
+        this.followingCount = followingCount;
     }
 
     public String getEmail() {
@@ -81,8 +112,26 @@ public class User {
         private String email;
         private String password;
         private UserRole role;
+        private boolean following;
+        private int followerCount;
+        private int followingCount;
 
         public Builder() {
+        }
+
+        public Builder withFollowing(boolean val) {
+            following = val;
+            return this;
+        }
+
+        public Builder withFollowerCount(int val) {
+            followerCount = val;
+            return this;
+        }
+
+        public Builder withFollowingCount(int val) {
+            followingCount = val;
+            return this;
         }
 
         public Builder withId(Long val) {

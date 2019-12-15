@@ -16,10 +16,12 @@ public class ApplicationStartupRunner implements CommandLineRunner {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+
     @Override
     public void run(String... args) throws Exception {
-        Optional<User> admin = Optional.ofNullable(userRepository.findByUsernameOrEmail("admin", "admin@mail.com"));
-        if(!admin.isPresent()){
+        Optional<User> admin = Optional.ofNullable(userRepository
+                .findByUsernameOrEmail("admin", "admin@mail.com"));
+        if (!admin.isPresent()) {
             User user = new User.Builder()
                     .withUsername("admin")
                     .withEmail("admin@mail.com")

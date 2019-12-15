@@ -6,6 +6,7 @@ import com.xebia.fs101.writerpad.domain.Comment;
 import com.xebia.fs101.writerpad.service.ArticleService;
 import com.xebia.fs101.writerpad.service.CommentService;
 import com.xebia.fs101.writerpad.service.SpamChecker;
+import com.xebia.fs101.writerpad.service.security.BothReadAndWrite;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 @RestController
 @RequestMapping("/api/articles")
 public class CommentResource {
@@ -35,6 +38,7 @@ public class CommentResource {
     @Autowired
     private SpamChecker spamChecker;
 
+    @BothReadAndWrite
     @PostMapping("/{slugUuid}/comments")
     public ResponseEntity<Comment> post(@Valid @RequestBody CommentRequest commentRequest,
                                         @PathVariable("slugUuid") String slugUuid,
@@ -45,13 +49,14 @@ public class CommentResource {
             Comment toSave = commentRequest.toComment(found, request.getRemoteAddr());
             Optional<Comment> saved = commentService.save(toSave);
             return saved.map(comment -> ResponseEntity.status(HttpStatus.CREATED)
-                    .body(comment)).orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(comment)).orElseGet(() -> ResponseEntity.status(BAD_REQUEST)
                     .build());
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .build();
     }
 
+    @BothReadAndWrite
     @GetMapping("/{slugUuid}/comments")
     public ResponseEntity<List<Comment>> getComments(@PathVariable String slugUuid) {
         Article article = articleService.findById(slugUuid);

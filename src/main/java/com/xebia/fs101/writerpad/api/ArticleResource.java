@@ -13,13 +13,13 @@ import com.xebia.fs101.writerpad.service.ArticleService;
 import com.xebia.fs101.writerpad.service.EmailService;
 import com.xebia.fs101.writerpad.service.ReadTimeCalculator;
 import com.xebia.fs101.writerpad.service.security.AdminOnly;
+import com.xebia.fs101.writerpad.service.security.BothReadAndWrite;
 import com.xebia.fs101.writerpad.service.security.EditorOnly;
 import com.xebia.fs101.writerpad.service.security.WriterOnly;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,8 +40,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/api/articles")
@@ -58,13 +62,15 @@ public class ArticleResource {
 
     @WriterOnly
     @PostMapping
-    public ResponseEntity<ArticleResponse> save(@AuthenticationPrincipal User user,
-            @Valid @RequestBody ArticleRequest articleRequest) {
+    public ResponseEntity<ArticleResponse> create(@AuthenticationPrincipal User user,
+                                                  @Valid
+                                                  @RequestBody ArticleRequest articleRequest) {
         ArticleResponse articleResponse = ArticleResponse.from(
                 articleService.save(articleRequest.toArticle(), user));
         return new ResponseEntity<>(articleResponse, CREATED);
     }
 
+    @WriterOnly
     @PatchMapping(path = "/{slug_uuid}")
     public ResponseEntity<Article> update(@AuthenticationPrincipal User user,
                                           @RequestBody ArticleRequest articleRequest,
@@ -78,19 +84,21 @@ public class ArticleResource {
         return updatedArticle.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
+    @BothReadAndWrite
     @GetMapping("/{slugUuid}")
     public ResponseEntity<Article> getArticleById(@PathVariable("slugUuid") String slugUuid) {
         Optional<Article> article = articleService.findArticleById(slugUuid);
         if (article.isPresent()) {
             Article found = article.get();
             return ResponseEntity
-                    .status(HttpStatus.OK)
+                    .status(OK)
                     .body(found);
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        return ResponseEntity.status(NOT_FOUND)
                 .build();
     }
 
+    @BothReadAndWrite
     @GetMapping
     public ResponseEntity<List<Article>> listAllArticles(
             @RequestParam(defaultValue = "0") Integer pageNo,
@@ -99,7 +107,7 @@ public class ArticleResource {
         Page<Article> pageResult = articleService.findAllArticles(pageable);
         List<Article> found = pageResult.getContent();
         return ResponseEntity
-                .status(HttpStatus.OK)
+                .status(OK)
                 .body(found);
     }
 
@@ -127,7 +135,7 @@ public class ArticleResource {
         Page<Article> pageResult = articleService.findByStatus(status, pageable);
         List<Article> found = pageResult.getContent();
         return ResponseEntity
-                .status(HttpStatus.OK)
+                .status(OK)
                 .body(found);
     }
 
@@ -142,15 +150,16 @@ public class ArticleResource {
             } catch (Exception ex) {
                 throw new WriterpadException(published, ex);
             }
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+            return ResponseEntity.status(NO_CONTENT)
                     .build();
         } else if (article.isPresent() && article.get().getStatus() == ArticleStatus.PUBLISHED) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            return ResponseEntity.status(BAD_REQUEST)
                     .build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        return ResponseEntity.status(NOT_FOUND)
                 .build();
     }
+
     @GetMapping(path = "/{slugUuid}/timetoread")
     public ResponseEntity<ReadTimeResponse> timeToRead(
             @PathVariable("slugUuid") final String slugUuid) {
@@ -159,7 +168,7 @@ public class ArticleResource {
         ReadTimeResponse readTimeResponse = new ReadTimeResponse(
                 slugUuid, new ReadTime((int) duration.toMinutes(),
                 (int) duration.getSeconds() % 60));
-        return new ResponseEntity<>(readTimeResponse, HttpStatus.OK);
+        return new ResponseEntity<>(readTimeResponse, OK);
 
     }
 
@@ -169,7 +178,7 @@ public class ArticleResource {
         List<TagResponse> tagResponses = tagsWithOccurence.entrySet().stream()
                 .map(e -> new TagResponse(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(tagResponses, HttpStatus.OK);
+        return new ResponseEntity<>(tagResponses, OK);
 
     }
 
