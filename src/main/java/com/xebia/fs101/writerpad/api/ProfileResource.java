@@ -27,9 +27,13 @@ public class ProfileResource {
     private ProfileService profileService;
 
     @GetMapping("/{username}")
-    public ResponseEntity<ProfileResponse> get(@PathVariable String username) {
-        User user = userService.find(username);
-        return ResponseEntity.status(OK).body(ProfileResponse.from(user));
+    public ResponseEntity<ProfileResponse> get(@CurrentUser User user,
+                                               @PathVariable String username) {
+        User userFound = userService.find(username);
+        if (user == null) {
+            return ResponseEntity.status(OK).body(ProfileResponse.from(userFound));
+        }
+        return ResponseEntity.status(OK).body(ProfileResponse.from(userFound, user.getUsername()));
     }
 
     @PostMapping("/{username}/follow")
@@ -37,7 +41,7 @@ public class ProfileResource {
                                                   @PathVariable String username) {
         User followedUser = userService.find(username);
         User followingUser = profileService.follow(user, followedUser);
-        return ResponseEntity.status(OK).body(ProfileResponse.from(followingUser));
+        return ResponseEntity.status(OK).body(ProfileResponse.from(followingUser, username));
     }
 
     @DeleteMapping("/{username}/follow")
@@ -45,6 +49,6 @@ public class ProfileResource {
                                                     @PathVariable String username) {
         User unfollowedUser = userService.find(username);
         User unfollowingUser = profileService.unfollow(user, unfollowedUser);
-        return ResponseEntity.status(OK).body(ProfileResponse.from(unfollowingUser));
+        return ResponseEntity.status(OK).body(ProfileResponse.from(unfollowingUser, username));
     }
 }

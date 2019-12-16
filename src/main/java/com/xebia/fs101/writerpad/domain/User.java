@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
+import java.util.HashSet;
 import java.util.List;
 
 @Entity
@@ -31,7 +32,7 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     private UserRole role;
 
-    private boolean following;
+    private HashSet<String> following;
     private int followerCount;
     private int followingCount;
 
@@ -66,11 +67,11 @@ public class User {
         return username;
     }
 
-    public boolean isFollowing() {
+    public HashSet<String> getFollowing() {
         return following;
     }
 
-    public void setFollowing(boolean following) {
+    public void setFollowing(HashSet<String> following) {
         this.following = following;
     }
 
@@ -112,14 +113,14 @@ public class User {
         private String email;
         private String password;
         private UserRole role;
-        private boolean following;
+        private HashSet<String> following;
         private int followerCount;
         private int followingCount;
 
         public Builder() {
         }
 
-        public Builder withFollowing(boolean val) {
+        public Builder withFollowing(HashSet<String> val) {
             following = val;
             return this;
         }
