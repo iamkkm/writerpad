@@ -19,9 +19,9 @@ class WriterpadApplicationTests {
 
 	@Test
 	void contextLoads() {
-//		commentRepository.deleteAll();
-//		articleRepository.deleteAll();
-//		userRepository.deleteAll();
+		commentRepository.deleteAll();
+		articleRepository.deleteAll();
+		userRepository.deleteAll();
 	}
 
 }
