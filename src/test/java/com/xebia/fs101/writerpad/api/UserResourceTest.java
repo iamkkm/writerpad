@@ -44,13 +44,6 @@ class UserResourceTest {
 
     private User user;
 
-    @AfterEach
-    public void tearDown() {
-        commentRepository.deleteAll();
-        articleRepository.deleteAll();
-        userRepository.deleteAll();
-    }
-
     @BeforeEach
     void setUp() {
         user = new User.Builder()
@@ -60,6 +53,16 @@ class UserResourceTest {
                 .withRole(UserRole.ADMIN)
                 .build();
         userRepository.save(user);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        commentRepository.deleteAll();
+        commentRepository.flush();
+        articleRepository.deleteAll();
+        articleRepository.flush();
+        userRepository.deleteAll();
+        userRepository.flush();
     }
 
     @Test

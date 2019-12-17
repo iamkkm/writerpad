@@ -73,8 +73,11 @@ class CommentResourceTest {
     @AfterEach
     void tearDown() {
         commentRepository.deleteAll();
+        commentRepository.flush();
         articleRepository.deleteAll();
+        articleRepository.flush();
         userRepository.deleteAll();
+        userRepository.flush();
     }
 
     @Test
