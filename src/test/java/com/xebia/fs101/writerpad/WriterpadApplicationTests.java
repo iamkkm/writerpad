@@ -1,5 +1,7 @@
 package com.xebia.fs101.writerpad;
 
+import com.xebia.fs101.writerpad.repository.ArticleRepository;
+import com.xebia.fs101.writerpad.repository.CommentRepository;
 import com.xebia.fs101.writerpad.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +12,16 @@ class WriterpadApplicationTests {
 
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private CommentRepository commentRepository;
+	@Autowired
+	private ArticleRepository articleRepository;
 
 	@Test
 	void contextLoads() {
-		userRepository.deleteAll();
+//		commentRepository.deleteAll();
+//		articleRepository.deleteAll();
+//		userRepository.deleteAll();
 	}
 
 }

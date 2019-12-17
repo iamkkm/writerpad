@@ -33,6 +33,7 @@ public class ProfileResource {
         if (user == null) {
             return ResponseEntity.status(OK).body(ProfileResponse.from(userFound));
         }
+
         return ResponseEntity.status(OK).body(ProfileResponse.from(userFound, user.getUsername()));
     }
 

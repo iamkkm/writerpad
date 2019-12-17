@@ -89,6 +89,12 @@
             <version>10.7.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt</artifactId>
+            <version>0.7.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -108,6 +114,7 @@
                         <artifactId>checkstyle</artifactId>
                         <version>7.7</version>
                     </dependency>
+
 
 
                 </dependencies>

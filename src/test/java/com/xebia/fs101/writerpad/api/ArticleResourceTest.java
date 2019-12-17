@@ -7,6 +7,7 @@ import com.xebia.fs101.writerpad.domain.Article;
 import com.xebia.fs101.writerpad.domain.ArticleStatus;
 import com.xebia.fs101.writerpad.domain.User;
 import com.xebia.fs101.writerpad.repository.ArticleRepository;
+import com.xebia.fs101.writerpad.repository.CommentRepository;
 import com.xebia.fs101.writerpad.repository.UserRepository;
 import com.xebia.fs101.writerpad.service.EmailService;
 import org.hamcrest.CoreMatchers;
@@ -56,6 +57,8 @@ class ArticleResourceTest {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private CommentRepository commentRepository;
 
     private User user;
 
@@ -73,9 +76,11 @@ class ArticleResourceTest {
 
     @AfterEach
     void tearDown() {
+        commentRepository.deleteAll();
         articleRepository.deleteAll();
-        userRepository.deleteAll();
+        userRepository.deleteAll();;
     }
+
 
     @Test
     void mock_mvc_not_null() {
