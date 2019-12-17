@@ -18,12 +18,6 @@ class WriterpadApplicationTests {
 	@Autowired
 	private ArticleRepository articleRepository;
 
-	@AfterEach
-	void tearDown() {
-		commentRepository.deleteAll();
-		articleRepository.deleteAll();
-		userRepository.deleteAll();
-	}
 
 	@Test
 	void contextLoads() {
