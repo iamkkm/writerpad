@@ -1,17 +1,14 @@
 package com.xebia.fs101.writerpad.service;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-@SpringBootTest
+
 class SpamCheckerTest {
 
-    @Autowired
-    private SpamChecker spamChecker;
+    private SpamChecker spamChecker = new SpamChecker();
 
     @Test
     void should_check_if_string_contains_sapm() throws IOException {
